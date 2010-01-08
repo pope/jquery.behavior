@@ -9,44 +9,42 @@
  * Date: 2009-12-13
  */
 (function ($) {
-    $.fn.behavior = function () {
-      var element = this;
-      
-      var attach = function (cls, config) {
-        $(element).each(function () {
-          this.behavior = new cls(this, config);
-        });
-        
-        return $(element);
-      }
-      
-      var get = function (index) {
-        return $(element).get(index || 0).behavior;
-      }
-      
-      var map = function (method, attributes) {
-        $(element).each(function () {
-          var obj = this.behavior;
-          if (method in obj) {
-            if (typeof obj[method] == 'function') {
-              obj[method].apply(obj, attributes);
-            } else {
-              obj[method] = attributes;
-            }
+
+    var bhv = "behavior";
+
+    function attach(jq, cls, config) {
+      return jq.each(function () {
+        $(this).data(bhv, new cls(this, config));
+      });
+    }
+
+    function get(jq, index) {
+      return $(jq.get(index)).data(bhv);
+    }
+
+    function map(jq, method, attributes) {
+      return jq.each(function () {
+        var obj = $(this).data(bhv);
+        if (method in obj) {
+          if (typeof obj[method] === 'function') {
+            obj[method].apply(obj, attributes);
+          } else {
+            obj[method] = attributes;
           }
-        });
-        
-        return $(element);
+        }
+      });
+    }
+
+    $.fn.behavior = function (p1, p2) {
+      if (p1) {
+        if (typeof p1 === 'function') {
+          return attach(this, p1, p2 || {});
+        } else if (typeof p1 === 'string') {
+          return map(this, p1, p2 || []);
+        } else if (typeof p1 === 'number') {
+          return get(this, p1);
+        }
       }
-   
-      if (arguments.length > 0 && typeof arguments[0] == 'function') {
-        return attach(arguments[0], arguments.length > 1 ? arguments[1] : {});
-      } else if (arguments.length > 0 && typeof arguments[0] == 'string') {
-        return map(arguments[0], arguments.length > 1 ? arguments[1] : []);
-      } else if (arguments.length > 0 && typeof arguments[0] == 'number') {
-        return get(arguments[0]);
-      } else {
-        return get();
-      }
+      return get(this);
     }
 })(jQuery);
